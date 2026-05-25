@@ -98,7 +98,7 @@ Modify `src/crewai/templates/crew.py.j2` to force the injection of robust config
 2. Exponential Backoff Policy
    The generator should inject a backoff decorator between agent tasks to prevent API request spamming during server recovery periods.
 
-- **Implementation:** Instead of immediate retries upon encountering an HTTP 429 or 503 error, the system should implement an exponential delay: $wait\_time = base\_delay \times 2^{retry\_count}$.
+- **Implementation:** Instead of immediate retries upon encountering an HTTP 429 or 503 error, the system should implement an exponential delay: $waittime = basedelay \times 2^{retrycount}$.
 - **Impact:** This strategy drastically reduces the probability of hitting permanent rate limits by allowing the upstream LLM provider's capacity to stabilize, effectively preventing a "thundering herd" problem where multiple agents attempt to reconnect simultaneously.
 
 3. Implementation of Static Checkpoints
