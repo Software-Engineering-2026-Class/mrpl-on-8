@@ -63,7 +63,7 @@ The pipeline generates "scaffolded" Python projects. Each processed graph result
 
 During the end-to-end runtime evaluation, a critical design weakness was identified regarding the reliability of the generated code.
 
-### ⚠️ HIGH SEVERITY: Vulnerability to Upstream Overload (HTTP 503 / 429 Errors)
+### HIGH SEVERITY: Vulnerability to Upstream Overload (HTTP 503 / 429 Errors)
 
 The generated applications are highly fragile when interacting with LLM providers under high demand.
 
