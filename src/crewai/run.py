@@ -17,6 +17,7 @@ Usage:
 import os
 import sys
 import shutil
+import json  # Ditambahkan untuk membuat file manifest.json
 
 # Support both `python -m` and direct script execution
 try:
@@ -53,6 +54,13 @@ def main():
         os.path.join(os.path.dirname(__file__), "..", "..")
     )
     output_base = os.path.join(project_root, "output_files", "output_crewai")
+
+    # Struktur data untuk menampung manifest hasil generasi
+    manifest_data = {
+        "framework": "CrewAI",
+        "output_directory": "output_files/output_crewai",
+        "generated_patterns": []
+    }
 
     # ── Handle single-file mode ──
     if len(sys.argv) > 1 and sys.argv[1].endswith(".ttl"):
@@ -108,9 +116,36 @@ def main():
         try:
             process_single(kg_path, output_dir)
             success += 1
+            
+            # Mencatat info sukses ke dalam struktur data manifest
+            manifest_data["generated_patterns"].append({
+                "pattern_name": dir_name,
+                "source_kg": filename,
+                "status": "Success",
+                "relative_path": f"output_files/output_crewai/{dir_name}",
+                "generated_files": ["agents.yaml", "tasks.yaml", "inputs.yaml", "crew.py", "main.py", "pyproject.toml"]
+            })
+            
         except Exception as e:
             print(f"  [ERROR] {e}")
             errors.append((filename, str(e)))
+            
+            # Mencatat info gagal ke dalam manifest
+            manifest_data["generated_patterns"].append({
+                "pattern_name": dir_name,
+                "source_kg": filename,
+                "status": "Failed",
+                "error_message": str(e)
+            })
+
+    # ── MENULIS MANIFEST FILE (Tugas Utama Issue #06) ──
+    manifest_path = os.path.join(output_base, "manifest.json")
+    try:
+        with open(manifest_path, "w", encoding="utf-8") as json_file:
+            json.dump(manifest_data, json_file, indent=4)
+        print(f"\n📝 [MANIFEST] Successfully generated manifest file at: {manifest_path}")
+    except Exception as e:
+        print(f"\n❌ [MANIFEST ERROR] Failed to create manifest file: {e}")
 
     # Summary
     print("\n" + "=" * 65)
