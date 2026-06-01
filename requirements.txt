@@ -2,3 +2,4 @@ rdflib
 pandas
 crewai
 autogen
+jinja2
