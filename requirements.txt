@@ -3,3 +3,4 @@ pandas
 crewai
 autogen
 jinja2
+dotenv
