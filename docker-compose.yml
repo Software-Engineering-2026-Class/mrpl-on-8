@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  agento:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agento-app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - ./src:/app/src          # Only mount src for development
+      - ./generated_kg:/app/generated_kg
+      - ./output_files:/app/output_files
+      - /app/__pycache__
+    working_dir: /app
+    command: python -m src.crewai.run
+    # Uncomment to run interactively:
+    # stdin_open: true
+    # tty: true
+    # command: /bin/bash
+
+  # Development service with hot reload
+  agento-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agento-dev
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: /bin/bash
