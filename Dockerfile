@@ -8,9 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements and install Python dependencies to a virtualenv
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Final stage
 FROM python:3.11-slim
@@ -22,26 +25,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
+# Create a non-root user for running the app
+RUN useradd -m -u 1000 appuser
 
-# Ensure pip, setuptools, and wheel are installed
-RUN /root/.local/bin/pip install --no-cache-dir --upgrade pip setuptools wheel
+# Copy Python virtualenv from builder
+COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
+
+# Set up environment
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    VIRTUAL_ENV=/opt/venv
 
 # Copy project files
-COPY pyproject.toml setup.py README.md LICENSE ./
-COPY src ./src
-COPY generated_kg ./generated_kg
-COPY scripts ./scripts
-COPY Script ./Script
-
-# Set environment variables
-ENV PATH=/root/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+COPY --chown=appuser:appuser pyproject.toml setup.py README.md LICENSE ./
+COPY --chown=appuser:appuser src ./src
+COPY --chown=appuser:appuser generated_kg ./generated_kg
+COPY --chown=appuser:appuser scripts ./scripts
+COPY --chown=appuser:appuser Script ./Script
 
 # Install the project in editable mode
 RUN pip install --no-cache-dir -e .
+
+# Switch to non-root user
+USER appuser
 
 # Default command
 CMD ["python", "-m", "src.crewai.run"]
