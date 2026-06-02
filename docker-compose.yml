@@ -10,9 +10,10 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
     volumes:
-      - .:/app
+      - ./src:/app/src          # Only mount src for development
+      - ./generated_kg:/app/generated_kg
+      - ./output_files:/app/output_files
       - /app/__pycache__
-      - /app/.venv
     working_dir: /app
     command: python -m src.crewai.run
     # Uncomment to run interactively:
