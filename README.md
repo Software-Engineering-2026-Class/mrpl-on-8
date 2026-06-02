@@ -101,3 +101,31 @@ pip install -r requirements.txt
    - Automated response generation
 
 3. View the complete workflow execution and results in the console output.
+
+### Option 3: Run Docker
+
+1. Install docker in your computer
+
+2. Build the image:
+
+   ```
+   docker compose build
+   ```
+
+3. Run the application via Docker:
+
+   ```
+   docker compose up agento
+   ```
+
+4. Go to development mode:
+
+   ```
+   docker compose run --rm agento-dev
+   ```
+
+5. Stop containers:
+
+   ``` 
+   docker compose down
+   ```
