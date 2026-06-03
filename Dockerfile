@@ -39,10 +39,10 @@ ENV PATH="/opt/venv/bin:$PATH" \
 
 # Copy project files
 COPY --chown=appuser:appuser pyproject.toml setup.py README.md LICENSE ./
-COPY --chown=appuser:appuser src ./src
-COPY --chown=appuser:appuser generated_kg ./generated_kg
-COPY --chown=appuser:appuser scripts ./scripts
-COPY --chown=appuser:appuser Script ./Script
+COPY --chown=appuser:appuser src/crewai/ ./src/crewai/
+COPY --chown=appuser:appuser generated_kg/CrewAI/ ./generated_kg/CrewAI/
+COPY --chown=appuser:appuser scripts/ ./scripts/
+COPY --chown=appuser:appuser Script/ ./Script/
 
 # Install the project in editable mode
 RUN pip install --no-cache-dir -e .
