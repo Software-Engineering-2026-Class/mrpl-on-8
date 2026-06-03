@@ -1,0 +1,41 @@
+@prefix : <https://w3id.org/agentic-ai/onto#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# 1. NEW ONTOLOGY PROPERTIES FOR AUTOGEN (Extending the base KG)
+# ---------------------------------------------------------------------------
+:AutoGenAgent a rdfs:Class ;
+    rdfs:subClassOf :Agent ;
+    rdfs:label "Base class for AutoGen specific agents" .
+
+:AssistantAgent a rdfs:Class ;
+    rdfs:subClassOf :AutoGenAgent ;
+    rdfs:label "AutoGen Assistant Agent (typically an LLM)" .
+
+:UserProxyAgent a rdfs:Class ;
+    rdfs:subClassOf :AutoGenAgent ;
+    rdfs:label "AutoGen User Proxy Agent (acts on behalf of humans)" .
+
+:humanInputMode a rdfs:Property ;
+    rdfs:domain :UserProxyAgent ;
+    rdfs:range xsd:string ;
+    rdfs:label "Defines when the user proxy should ask for human input (e.g., ALWAYS, NEVER, TERMINATE)" .
+
+# ---------------------------------------------------------------------------
+# 2. NEW KG INSTANCES (The Second Framework Pattern)
+# ---------------------------------------------------------------------------
+:AutoGen_TwoAgentPattern a :Workflow ;
+    rdfs:label "Basic Two-Agent Chat Pattern in AutoGen" ;
+    :framework "AutoGen" ;
+    :hasAgent :CoderAssistant, :UserProxy .
+
+:CoderAssistant a :AssistantAgent ;
+    :hasName "Coder_Assistant" ;
+    :hasRole "Write Python code to solve the user's task." ;
+    :systemMessage "You are a helpful AI assistant. You write code to solve problems and explain them clearly." .
+
+:UserProxy a :UserProxyAgent ;
+    :hasName "User_Proxy" ;
+    :hasRole "Execute the generated code and provide feedback or terminate." ;
+    :humanInputMode "ALWAYS" .
