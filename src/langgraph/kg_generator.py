@@ -45,7 +45,7 @@ class AgentOGenerator:
                     "id": step_id,
                     "title": title,
                     "agent": str(row.agentTitle) if row.agentTitle else "GenericAgent",
-                    "prompt": str(row.prompt) if row.prompt else "Execute task.",
+                    "prompt": repr(str(row.prompt).strip()) if row.prompt else repr("Execute task."),
                     "is_nested": False
                 }
             
@@ -57,15 +57,23 @@ class AgentOGenerator:
                 next_id = str(row.nextStep).split("#")[-1]
                 edges.append((step_id, next_id))
                 
+        # Post-process edges: if a destination is not in nodes, it's an end step
+        processed_edges = []
+        for src, dst in set(edges):
+            if dst not in nodes:
+                processed_edges.append((src, "END"))
+            else:
+                processed_edges.append((src, dst))
+
         # Calculate Entry Points
-        all_destinations = {edge[1] for edge in edges}
+        all_destinations = {edge[1] for edge in processed_edges}
         entry_points = [node_id for node_id in nodes if node_id not in all_destinations]
         if not entry_points and nodes:
             entry_points = [list(nodes.keys())[0]]
                 
         return {
             "nodes": list(nodes.values()),
-            "edges": list(set(edges)),
+            "edges": processed_edges,
             "nested": nested_graphs,
             "entry_points": entry_points
         }
@@ -103,7 +111,7 @@ llm = ChatGoogleGenerativeAI(model=clean_model_name, google_api_key=api_key)
 {% if not node.is_nested %}
 def {{ node.id }}_node(state: AgentState):
     '''Executes the task for {{ node.agent }}.'''
-    system_msg = SystemMessage(content="{{ node.prompt }}")
+    system_msg = SystemMessage(content={{ node.prompt }})
     response = llm.invoke([system_msg] + state["messages"])
     return {"messages": [response]}
 {% else %}
@@ -127,7 +135,11 @@ workflow.add_edge(START, "{{ ep }}")
 
 # Add Edges
 {% for edge in edges %}
+{% if edge[1] == 'END' %}
+workflow.add_edge("{{ edge[0] }}", END)
+{% else %}
 workflow.add_edge("{{ edge[0] }}", "{{ edge[1] }}")
+{% endif %}
 {% endfor %}
 
 # Compile the Engine
