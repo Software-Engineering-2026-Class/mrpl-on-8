@@ -1,4 +1,5 @@
 import os
+import sys
 import rdflib
 from jinja2 import Environment, DictLoader
 
@@ -70,10 +71,38 @@ class AgentOGenerator:
         entry_points = [node_id for node_id in nodes if node_id not in all_destinations]
         if not entry_points and nodes:
             entry_points = [list(nodes.keys())[0]]
+            
+        # Detect cycles (back-edges)
+        from collections import defaultdict
+        adj = defaultdict(list)
+        for u, v in edges:
+            adj[u].append(v)
+            
+        visited = set()
+        recursion_stack = set()
+        back_edges = set()
+        
+        def dfs(node):
+            visited.add(node)
+            recursion_stack.add(node)
+            for neighbor in adj[node]:
+                if neighbor not in visited:
+                    dfs(neighbor)
+                elif neighbor in recursion_stack:
+                    back_edges.add((node, neighbor))
+            recursion_stack.remove(node)
+            
+        for ep in entry_points:
+            dfs(ep)
+            
+        normal_edges = [e for e in edges if e not in back_edges]
+        conditional_edges = [e for e in edges if e in back_edges]
                 
         return {
             "nodes": list(nodes.values()),
             "edges": processed_edges,
+            "normal_edges": normal_edges,
+            "conditional_edges": conditional_edges,
             "nested": nested_graphs,
             "entry_points": entry_points
         }
@@ -84,6 +113,7 @@ class AgentOGenerator:
         template_string = """
 import operator
 import os
+import sys
 from typing import Annotated, Sequence, TypedDict
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -138,8 +168,27 @@ workflow.add_edge(START, "{{ ep }}")
 {% if edge[1] == 'END' %}
 workflow.add_edge("{{ edge[0] }}", END)
 {% else %}
+# Add Normal Edges
+{% for edge in normal_edges %}
 workflow.add_edge("{{ edge[0] }}", "{{ edge[1] }}")
 {% endif %}
+{% endfor %}
+
+# Add Conditional Edges for cycles
+{% for edge in conditional_edges %}
+def router_{{ edge[0] }}_{{ edge[1] }}(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "{{ edge[0] }}",
+    router_{{ edge[0] }}_{{ edge[1] }},
+    {
+        "continue": "{{ edge[1] }}",
+        "end": END
+    }
+)
 {% endfor %}
 
 # Compile the Engine
@@ -149,7 +198,12 @@ if __name__ == "__main__":
     print(f"LangGraph Compiled Successfully using model: {clean_model_name}.")
     print("Invoking the agent...")
     
-    initial_state = {"messages": [HumanMessage(content="Hello! Can you help me plan a trip?")]}
+    if len(sys.argv) > 1:
+        user_input = " ".join(sys.argv[1:])
+    else:
+        user_input = input("Enter your message: ")
+        
+    initial_state = {"messages": [HumanMessage(content=user_input)]}
     
     try:
         result = app.invoke(initial_state)
@@ -162,24 +216,34 @@ if __name__ == "__main__":
         template = env.get_template('langgraph_main')
         return template.render(
             nodes=topology["nodes"], 
-            edges=topology["edges"],
+            normal_edges=topology["normal_edges"],
+            conditional_edges=topology["conditional_edges"],
             nested=topology["nested"],
             entry_points=topology["entry_points"]
         )
 
 # Execution
 if __name__ == "__main__":
-    input_file = "generated_kg/LangGraph/chat-agent_instances.ttl"
-    output_dir = "output_files/output_langgraph/"
+    if len(sys.argv) > 2:
+        input_dir = sys.argv[1]
+        output_dir = sys.argv[2]
+    else:
+        input_dir = input("Enter input directory path (e.g. generated_kg/LangGraph/): ") or "generated_kg/LangGraph/"
+        output_dir = input("Enter output directory path (e.g. output_files/output_langgraph/): ") or "output_files/output_langgraph/"
     
     os.makedirs(output_dir, exist_ok=True)
     
-    generator = AgentOGenerator(input_file)
-    topology_data = generator.extract_topology()
-    executable_python_code = generator.generate_code(topology_data)
-    
-    output_path = os.path.join(output_dir, "generated_langgraph_app.py")
-    with open(output_path, "w") as f:
-        f.write(executable_python_code)
-        
-    print(f"Success! LangGraph project generated at: {output_path}")
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".ttl"):
+            input_file = os.path.join(input_dir, filename)
+            
+            generator = AgentOGenerator(input_file)
+            topology_data = generator.extract_topology()
+            executable_python_code = generator.generate_code(topology_data)
+            
+            output_filename = filename.replace(".ttl", ".py")
+            output_path = os.path.join(output_dir, output_filename)
+            with open(output_path, "w") as f:
+                f.write(executable_python_code)
+                
+            print(f"Success! LangGraph project generated at: {output_path}")
