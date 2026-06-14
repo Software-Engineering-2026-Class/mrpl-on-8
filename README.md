@@ -2,10 +2,10 @@
 
 Kelompok 8:
 
-- Rayhan Haldi Hermawan (24/545406/PA/23176)
-- Pratama Nanindra Aji (24/533677/PA/22604)
-- Muhammad Rayyan Buna Satria (24/543564/PA/23096)
-- Kevin Febriano (24/541948/PA/23002)
+1. Rayhan Haldi Hermawan           (24/545406/PA/23176)
+2. Pratama Nanindra Aji            (24/533677/PA/22604)
+3. Muhammad Rayyan Buna Satria     (24/543564/PA/23096)
+4. Kevin Febriano                  (24/541948/PA/23002)
 
 # Agentic AI Framework Generator
 
