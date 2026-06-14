@@ -1,4 +1,5 @@
 import os
+import sys
 import rdflib
 from jinja2 import Environment, DictLoader
 
@@ -76,6 +77,7 @@ class AgentOGenerator:
         template_string = """
 import operator
 import os
+import sys
 from typing import Annotated, Sequence, TypedDict
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -137,7 +139,12 @@ if __name__ == "__main__":
     print(f"LangGraph Compiled Successfully using model: {clean_model_name}.")
     print("Invoking the agent...")
     
-    initial_state = {"messages": [HumanMessage(content="Hello! Can you help me plan a trip?")]}
+    if len(sys.argv) > 1:
+        user_input = " ".join(sys.argv[1:])
+    else:
+        user_input = input("Enter your message: ")
+        
+    initial_state = {"messages": [HumanMessage(content=user_input)]}
     
     try:
         result = app.invoke(initial_state)
@@ -157,17 +164,26 @@ if __name__ == "__main__":
 
 # Execution
 if __name__ == "__main__":
-    input_file = "generated_kg/LangGraph/chat-agent_instances.ttl"
-    output_dir = "output_files/output_langgraph/"
+    if len(sys.argv) > 2:
+        input_dir = sys.argv[1]
+        output_dir = sys.argv[2]
+    else:
+        input_dir = input("Enter input directory path (e.g. generated_kg/LangGraph/): ") or "generated_kg/LangGraph/"
+        output_dir = input("Enter output directory path (e.g. output_files/output_langgraph/): ") or "output_files/output_langgraph/"
     
     os.makedirs(output_dir, exist_ok=True)
     
-    generator = AgentOGenerator(input_file)
-    topology_data = generator.extract_topology()
-    executable_python_code = generator.generate_code(topology_data)
-    
-    output_path = os.path.join(output_dir, "generated_langgraph_app.py")
-    with open(output_path, "w") as f:
-        f.write(executable_python_code)
-        
-    print(f"Success! LangGraph project generated at: {output_path}")
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".ttl"):
+            input_file = os.path.join(input_dir, filename)
+            
+            generator = AgentOGenerator(input_file)
+            topology_data = generator.extract_topology()
+            executable_python_code = generator.generate_code(topology_data)
+            
+            output_filename = filename.replace(".ttl", ".py")
+            output_path = os.path.join(output_dir, output_filename)
+            with open(output_path, "w") as f:
+                f.write(executable_python_code)
+                
+            print(f"Success! LangGraph project generated at: {output_path}")
