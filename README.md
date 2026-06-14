@@ -2,10 +2,10 @@
 
 Kelompok 8:
 
-- Rayhan Haldi Hermawan (24/545406/PA/23176)
-- Pratama Nanindra Aji (24/533677/PA/22604)
-- Muhammad Rayyan Buna Satria (24/543564/PA/23096)
-- Kevin Febriano (24/541948/PA/23002)
+1. Rayhan Haldi Hermawan           (24/545406/PA/23176)
+2. Pratama Nanindra Aji            (24/533677/PA/22604)
+3. Muhammad Rayyan Buna Satria     (24/543564/PA/23096)
+4. Kevin Febriano                  (24/541948/PA/23002)
 
 # Agentic AI Framework Generator
 
@@ -101,3 +101,31 @@ pip install -r requirements.txt
    - Automated response generation
 
 3. View the complete workflow execution and results in the console output.
+
+### Option 3: Run Docker
+
+1. Install docker in your computer
+
+2. Build the image:
+
+   ```
+   docker compose build
+   ```
+
+3. Run the application via Docker:
+
+   ```
+   docker compose up agento
+   ```
+
+4. Go to development mode:
+
+   ```
+   docker compose run --rm agento-dev
+   ```
+
+5. Stop containers:
+
+   ``` 
+   docker compose down
+   ```
