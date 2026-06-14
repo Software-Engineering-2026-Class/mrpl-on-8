@@ -93,14 +93,15 @@ def main():
     os.makedirs(output_base, exist_ok=True)
 
     # Header
-    print("=" * 65)
+    separator_length = 65
+    print("=" * separator_length)
     print("  KG → SPARQL → Pydantic → CrewAI Project Generator")
     print("  Pipeline: 3-Layer Conversion (SPARQL / Pydantic / YAML+Jinja2)")
-    print("=" * 65)
+    print("=" * separator_length)
     print(f"  Source : {kg_dir}")
     print(f"  Output : {output_base}")
     print(f"  Files  : {len(ttl_files)} knowledge graphs")
-    print("=" * 65)
+    print("=" * separator_length)
 
     # Process each KG
     success = 0
@@ -148,13 +149,13 @@ def main():
         print(f"\n❌ [MANIFEST ERROR] Failed to create manifest file: {e}")
 
     # Summary
-    print("\n" + "=" * 65)
+    print("\n" + "=" * separator_length)
     print(f"  Done. {success}/{len(ttl_files)} projects generated successfully.")
     if errors:
         print(f"  Errors ({len(errors)}):")
         for fname, err in errors:
             print(f"    - {fname}: {err}")
-    print("=" * 65)
+    print("=" * separator_length)
 
 
 if __name__ == "__main__":
