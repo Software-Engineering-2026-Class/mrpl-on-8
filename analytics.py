@@ -1,7 +1,14 @@
-import os
+import argparse
 import glob
+import os
 import re
+
 from rdflib import Graph
+
+# ---- configurable constants ----
+DEFAULT_KG_FOLDER = "generated_kg"
+DEFAULT_OUTPUT_FOLDER = "output_files"
+FALLBACK_TTL = "agentO.ttl"
 
 def count_kg_patterns_glob(kg_folder):
     """Menghitung total pola/triple dari semua file .ttl di folder generated_kg."""
@@ -10,8 +17,8 @@ def count_kg_patterns_glob(kg_folder):
     
     if not ttl_files:
         # Fallback jika file ttl ada di root proyek
-        if os.path.exists("agentO.ttl"):
-            ttl_files = ["agentO.ttl"]
+        if os.path.exists(FALLBACK_TTL):
+            ttl_files = [FALLBACK_TTL]
 
     for filepath in ttl_files:
         try:
@@ -125,5 +132,10 @@ def print_report(kg_folder, output_folder):
     print("==================================================\n")
 
 if __name__ == "__main__":
-    # Menyesuaikan dengan path log generator kamu tadi
-    print_report("generated_kg", "output_files")
+    parser = argparse.ArgumentParser(description="Framework generation summary report")
+    parser.add_argument("--kg-folder", default=DEFAULT_KG_FOLDER,
+                        help=f"Path to KG folder (default: {DEFAULT_KG_FOLDER})")
+    parser.add_argument("--output-folder", default=DEFAULT_OUTPUT_FOLDER,
+                        help=f"Path to output folder (default: {DEFAULT_OUTPUT_FOLDER})")
+    args = parser.parse_args()
+    print_report(args.kg_folder, args.output_folder)
