@@ -1,6 +1,6 @@
 # Metode Rekayasa Perangkat Lunak KOMB - Ilmu Komputer UGM 2026
 
-Kelompok 8:
+## Kelompok 8:
 
 1. Pratama Nanindra Aji            (24/533677/PA/22604) (Team Leader)
 2. Muhammad Rayyan Buna Satria     (24/543564/PA/23096) (AI and Code Engineer)
@@ -33,7 +33,7 @@ graph TD;
 - **Ontology-based Generation**: Uses the standard Agentic AI Ontology (https://w3id.org/agentic-ai/onto) as the foundation
 - **Multi-framework Support**: Generates code for multiple agentic AI frameworks:
   - CrewAI
-  - AutoGen
+  - LangGraph
 - **Knowledge Graph Parsing**: Reads and interprets KGs in RDF/Turtle format (.ttl, .rdf)
 - **Pattern Recognition**: Extracts agentic AI patterns including agents, tasks, tools, and workflows
 - **Automated Code Generation**: Produces executable Python scripts for target frameworks
@@ -46,19 +46,16 @@ graph TD;
    cd agentic-generator
    ```
 2. Create and activate a virtual environment:
-
-```bash
-python -m venv venv
-source venv/bin/activate       # macOS/Linux
-venv\Scripts\activate          # Windows
-```
+   ```bash
+   python -m venv venv
+   source venv/bin/activate       # macOS/Linux
+   venv\Scripts\activate          # Windows
+   ```
 
 3. Install dependencies:
-
-```bash
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Environment Variables & Configuration
 
@@ -79,17 +76,21 @@ The application uses a `.env` file to manage configuration variables. Ensure you
    Example: `data/dummy_kg.ttl`
 
 2. Run the automated pipeline:
-
+   - CrewAI:
    ```bash
-   python runner.py
+   python src/crewai/run.py
+   ```
+   - LangGraph:
+   ```bash
+   python src/langgraph/kg_generator.py
    ```
 
    This will automatically:
    - Parse the knowledge graph ontology
    - Generate CrewAI framework code
-   - Generate AutoGen framework code
+   - Generate LangGraph framework code
 
-3. Check the `output/` folder for generated scripts:
+4. Check the `output/` folder for generated scripts:
    - `crewai_generated.py`
    - `autogen_generated.py`
 
