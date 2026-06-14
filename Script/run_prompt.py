@@ -1,13 +1,22 @@
 import os
 import sys
 import time
+
+from dotenv import load_dotenv
 from openai import OpenAI
 
+# ---- load configuration from .env / environment ----
+load_dotenv()
+
+if not os.environ.get("OPENAI_API_KEY"):
+    print("Error: OPENAI_API_KEY is not set. "
+          "Set it in a .env file or export it in your shell.")
+    sys.exit(1)
+
 client = OpenAI()
-os.environ["OPENAI_API_KEY"] = "your_api_key_here"  # set your API key here or ensure it's set in the environment
-prompt_file = "analysis.prompt.md"
-ontology_file = "agentic-o.ttl"
-model_name = "gpt-5-mini"   # change as needed
+prompt_file = os.environ.get("PROMPT_FILE", "analysis.prompt.md")
+ontology_file = os.environ.get("ONTOLOGY_FILE", "agentic-o.ttl")
+model_name = os.environ.get("MODEL_NAME", "gpt-5-mini")
 
 # ---- argument handling ----
 if len(sys.argv) < 2:
@@ -21,7 +30,7 @@ if not os.path.isdir(folder):
     sys.exit(1)
 
 # ---- determine output path ----
-outdir = "agent-o"
+outdir = os.environ.get("OUTPUT_DIR", "agent-o")
 os.makedirs(outdir, exist_ok=True)
 
 outname = os.path.basename(os.path.normpath(folder)) + "_instances.ttl"
