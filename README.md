@@ -2,10 +2,10 @@
 
 Kelompok 8:
 
-1. Rayhan Haldi Hermawan           (24/545406/PA/23176)
-2. Pratama Nanindra Aji            (24/533677/PA/22604)
-3. Muhammad Rayyan Buna Satria     (24/543564/PA/23096)
-4. Kevin Febriano                  (24/541948/PA/23002)
+1. Rayhan Haldi Hermawan           (24/545406/PA/23176) - Project Manager / Lead Developer
+2. Pratama Nanindra Aji            (24/533677/PA/22604) - AI Engineer / Architect
+3. Muhammad Rayyan Buna Satria     (24/543564/PA/23096) - Backend Developer
+4. Kevin Febriano                  (24/541948/PA/23002) - QA / Documentation Specialist
 
 # Agentic AI Framework Generator
 
@@ -16,6 +16,17 @@ This project is a tool/pipeline that automatically generates Agentic AI framewor
 ### Project Overview
 
 The generator bridges the gap between abstract agentic AI patterns defined in ontologies and concrete implementations in popular agentic AI frameworks. By parsing Knowledge Graphs that describe agentic AI patterns, the tool can automatically produce runnable code that implements these patterns in different target frameworks.
+
+#### System Architecture
+```mermaid
+graph TD;
+    A[Knowledge Graph .ttl / .rdf] -->|Parsed by| B(Ontology Parser)
+    B --> C{Framework Generator}
+    C -->|Jinja2 Templates| D[CrewAI Python Scripts]
+    C -->|Jinja2 Templates| E[LangGraph Python Scripts]
+    D --> F((Executable AI Agents))
+    E --> F
+```
 
 ### Key Features
 
@@ -45,8 +56,20 @@ venv\Scripts\activate          # Windows
 3. Install dependencies:
 
 ```bash
+```bash
 pip install -r requirements.txt
 ```
+
+## Environment Variables & Configuration
+
+The application uses a `.env` file to manage configuration variables. Ensure you create a `.env` file in the root directory (you can copy `.env.example`).
+
+| Variable Name | Description | Default / Example |
+|---|---|---|
+| `GEMINI_API_KEY` | API Key for accessing Gemini Models (used by default LangGraph generator) | `your_gemini_api_key` |
+| `OPENAI_API_KEY` | API Key for accessing OpenAI Models (used by default CrewAI generator) | `your_openai_api_key` |
+| `OPENAI_MODEL_NAME` | The default LLM model name to invoke in the scripts | `gemini/gemini-3.1-flash-lite` |
+
 
 ## Usage
 
@@ -117,6 +140,7 @@ pip install -r requirements.txt
    ```
    docker compose up agento
    ```
+   *Note: Because this is a CLI pipeline application, no external port mappings are required in `docker-compose.yml`. All processes run natively within the container and output code artifacts to the bound `/app/output_files` volume.*
 
 4. Go to development mode:
 
@@ -129,3 +153,23 @@ pip install -r requirements.txt
    ``` 
    docker compose down
    ```
+
+## Detailed Use Cases
+
+Below are 3 documented use cases of patterns processed by this pipeline:
+
+### Use Case 1: Chat Agent (LangGraph)
+- **Description:** A simple conversational LLM node that processes user input messages and replies using the Google Gemini model. It maintains conversation state sequentially.
+- **Input:** A string message from the user (e.g., `Hello, what can you do?`).
+- **Output:** The raw text response from the language model acting as a helpful assistant (e.g., `I am a helpful AI assistant. I can answer questions and write code!`).
+
+### Use Case 2: Recruitment Crew (CrewAI)
+- **Description:** A multi-agent sequential pipeline consisting of a Researcher, Matcher, Communicator, and Reporter. It evaluates job candidates against job requirements.
+- **Input:** A set of Job Requirements and a description of the desired candidate (e.g., `Looking for a Senior React Engineer with 5 years of experience...`).
+- **Output:** A detailed Markdown report presenting the best candidates, their suitability scores, and a draft outreach email strategy.
+
+### Use Case 3: Pizza Orderer (LangGraph)
+- **Description:** A conditional routing graph that locates a nearby pizza store before processing an order transaction.
+- **Input:** A natural language request to order pizza (e.g., `I want to order a large pepperoni pizza to 123 Main St.`).
+- **Output:** Execution traces of the agent finding the store (`Executing task: findStore`) followed by processing the order (`Executing task: orderPizza`) and returning a success message.
+
