@@ -63,10 +63,37 @@ class AgentOGenerator:
         entry_points = [node_id for node_id in nodes if node_id not in all_destinations]
         if not entry_points and nodes:
             entry_points = [list(nodes.keys())[0]]
+            
+        # Detect cycles (back-edges)
+        from collections import defaultdict
+        adj = defaultdict(list)
+        for u, v in edges:
+            adj[u].append(v)
+            
+        visited = set()
+        recursion_stack = set()
+        back_edges = set()
+        
+        def dfs(node):
+            visited.add(node)
+            recursion_stack.add(node)
+            for neighbor in adj[node]:
+                if neighbor not in visited:
+                    dfs(neighbor)
+                elif neighbor in recursion_stack:
+                    back_edges.add((node, neighbor))
+            recursion_stack.remove(node)
+            
+        for ep in entry_points:
+            dfs(ep)
+            
+        normal_edges = [e for e in edges if e not in back_edges]
+        conditional_edges = [e for e in edges if e in back_edges]
                 
         return {
             "nodes": list(nodes.values()),
-            "edges": list(set(edges)),
+            "normal_edges": normal_edges,
+            "conditional_edges": conditional_edges,
             "nested": nested_graphs,
             "entry_points": entry_points
         }
@@ -127,9 +154,26 @@ workflow.add_node("{{ node.id }}", {{ node.id }}_node)
 workflow.add_edge(START, "{{ ep }}")
 {% endfor %}
 
-# Add Edges
-{% for edge in edges %}
+# Add Normal Edges
+{% for edge in normal_edges %}
 workflow.add_edge("{{ edge[0] }}", "{{ edge[1] }}")
+{% endfor %}
+
+# Add Conditional Edges for cycles
+{% for edge in conditional_edges %}
+def router_{{ edge[0] }}_{{ edge[1] }}(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "{{ edge[0] }}",
+    router_{{ edge[0] }}_{{ edge[1] }},
+    {
+        "continue": "{{ edge[1] }}",
+        "end": END
+    }
+)
 {% endfor %}
 
 # Compile the Engine
@@ -157,7 +201,8 @@ if __name__ == "__main__":
         template = env.get_template('langgraph_main')
         return template.render(
             nodes=topology["nodes"], 
-            edges=topology["edges"],
+            normal_edges=topology["normal_edges"],
+            conditional_edges=topology["conditional_edges"],
             nested=topology["nested"],
             entry_points=topology["entry_points"]
         )

@@ -72,7 +72,10 @@ workflow.add_edge(START, "WriterStep")
 workflow.add_edge(START, "SuggestionsStep")
 
 
-# Add Edges
+# Add Normal Edges
+
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

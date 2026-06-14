@@ -27,7 +27,7 @@ llm = ChatGoogleGenerativeAI(model=clean_model_name, google_api_key=api_key)
 # --- 3. Node Definitions ---
 
 
-def RouterStep_node(state: AgentState):
+def ws_research_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -35,7 +35,7 @@ def RouterStep_node(state: AgentState):
 
 
 
-def StockbrokerStep_node(state: AgentState):
+def ws_match_and_score_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -43,7 +43,7 @@ def StockbrokerStep_node(state: AgentState):
 
 
 
-def TripPlannerStep_node(state: AgentState):
+def ws_outreach_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -51,39 +51,7 @@ def TripPlannerStep_node(state: AgentState):
 
 
 
-def OpenCodeStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def OrderPizzaStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def GeneralInputStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def WriterAgentStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def EndStep_Generic_node(state: AgentState):
+def ws_report_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -96,43 +64,27 @@ workflow = StateGraph(AgentState)
 
 # Add Nodes
 
-workflow.add_node("RouterStep", RouterStep_node)
+workflow.add_node("ws_research", ws_research_node)
 
-workflow.add_node("StockbrokerStep", StockbrokerStep_node)
+workflow.add_node("ws_match_and_score", ws_match_and_score_node)
 
-workflow.add_node("TripPlannerStep", TripPlannerStep_node)
+workflow.add_node("ws_outreach", ws_outreach_node)
 
-workflow.add_node("OpenCodeStep", OpenCodeStep_node)
-
-workflow.add_node("OrderPizzaStep", OrderPizzaStep_node)
-
-workflow.add_node("GeneralInputStep", GeneralInputStep_node)
-
-workflow.add_node("WriterAgentStep", WriterAgentStep_node)
-
-workflow.add_node("EndStep_Generic", EndStep_Generic_node)
+workflow.add_node("ws_report", ws_report_node)
 
 
 # Add Entry Points (START)
 
-workflow.add_edge(START, "RouterStep")
-
-workflow.add_edge(START, "EndStep_Generic")
+workflow.add_edge(START, "ws_research")
 
 
 # Add Normal Edges
 
-workflow.add_edge("RouterStep", "StockbrokerStep")
+workflow.add_edge("ws_research", "ws_match_and_score")
 
-workflow.add_edge("RouterStep", "TripPlannerStep")
+workflow.add_edge("ws_match_and_score", "ws_outreach")
 
-workflow.add_edge("RouterStep", "OpenCodeStep")
-
-workflow.add_edge("RouterStep", "OrderPizzaStep")
-
-workflow.add_edge("RouterStep", "GeneralInputStep")
-
-workflow.add_edge("RouterStep", "WriterAgentStep")
+workflow.add_edge("ws_outreach", "ws_report")
 
 
 # Add Conditional Edges for cycles

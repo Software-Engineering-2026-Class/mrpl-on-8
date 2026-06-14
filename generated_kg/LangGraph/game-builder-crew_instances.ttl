@@ -1,0 +1,84 @@
+@prefix : <http://www.w3id.org/agentic-ai/onto#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+#################################################################
+# Ontology Extension: Hierarchical Processes
+#################################################################
+# The following properties are added to represent hierarchical 
+# patterns found in frameworks like CrewAI when mapped to 
+# LangGraph state machines.
+
+:isHierarchical a rdf:Property ;
+    rdfs:label "isHierarchical" ;
+    rdfs:domain :WorkflowPattern ;
+    rdfs:range <http://www.w3.org/2001/XMLSchema#boolean> ;
+    rdfs:comment "Indicates if the workflow uses a hierarchical manager to route to workers." .
+
+:managedBy a rdf:Property ;
+    rdfs:label "managedBy" ;
+    rdfs:domain :WorkflowPattern ;
+    rdfs:range :ManagerAgent ;
+    rdfs:comment "Links the hierarchical workflow to the main coordinating ManagerAgent." .
+
+:ManagerAgent a rdfs:Class ;
+    rdfs:subClassOf :LLMAgent ;
+    rdfs:comment "An agent that decides which worker task to execute next." .
+
+
+#################################################################
+# Ported Pattern: Game Builder Crew (Hierarchical) -> LangGraph
+#################################################################
+
+:GameBuilderPattern a :WorkflowPattern ;
+    rdfs:label "Game Builder Workflow Pattern" ;
+    :isHierarchical true ;
+    :managedBy :agent_manager ;
+    :hasWorkflowStep :ws_manager , :ws_coder , :ws_qa , :ws_reviewer .
+
+# --- Agents ---
+:agent_manager a :ManagerAgent ;
+    rdfs:label "Game Manager Agent" ;
+    :agentPrompt [ :promptContext "You coordinate the game development process, routing tasks to Coder, QA, or Reviewer." ] .
+
+:agent_coder a :LLMAgent ;
+    rdfs:label "Senior Software Engineer" ;
+    :agentPrompt [ :promptContext "Write game mechanics code." ] .
+
+:agent_qa a :LLMAgent ;
+    rdfs:label "Software Quality Control Engineer" ;
+    :agentPrompt [ :promptContext "Test the game code for bugs." ] .
+
+:agent_reviewer a :LLMAgent ;
+    rdfs:label "Chief Software Engineering Reviewer" ;
+    :agentPrompt [ :promptContext "Review the final code architecture." ] .
+
+# --- Tasks (Nodes) ---
+# The manager is the start step and routes to other nodes.
+:ws_manager a :StartStep ;
+    rdfs:label "Manager Router Step" ;
+    :stepOrder 1 ;
+    :nextStep :ws_coder ;
+    :nextStep :ws_qa ;
+    :nextStep :ws_reviewer ;
+    :hasAssociatedTask [ :performedByAgent :agent_manager ] .
+
+# Workers route back to the manager (forming cycles, handled by generator fallback router)
+:ws_coder a :WorkflowStep ;
+    rdfs:label "Code Generation Step" ;
+    :stepOrder 2 ;
+    :nextStep :ws_manager ;
+    :hasAssociatedTask [ :performedByAgent :agent_coder ] .
+
+:ws_qa a :WorkflowStep ;
+    rdfs:label "QA Step" ;
+    :stepOrder 3 ;
+    :nextStep :ws_manager ;
+    :hasAssociatedTask [ :performedByAgent :agent_qa ] .
+
+:ws_reviewer a :EndStep ;
+    rdfs:label "Review Step" ;
+    :stepOrder 4 ;
+    # The reviewer could be the final step, or it goes back to manager
+    :nextStep :ws_manager ;
+    :hasAssociatedTask [ :performedByAgent :agent_reviewer ] .

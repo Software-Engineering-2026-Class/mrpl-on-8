@@ -58,9 +58,12 @@ workflow.add_node("step_orderPizza", step_orderPizza_node)
 workflow.add_edge(START, "step_findStore")
 
 
-# Add Edges
+# Add Normal Edges
 
 workflow.add_edge("step_findStore", "step_orderPizza")
+
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

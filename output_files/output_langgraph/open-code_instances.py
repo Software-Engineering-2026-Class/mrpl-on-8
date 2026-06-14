@@ -58,11 +58,26 @@ workflow.add_node("WorkflowStep_Executor", WorkflowStep_Executor_node)
 workflow.add_edge(START, "WorkflowStep_Planner")
 
 
-# Add Edges
-
-workflow.add_edge("WorkflowStep_Executor", "WorkflowStep_Planner")
+# Add Normal Edges
 
 workflow.add_edge("WorkflowStep_Planner", "WorkflowStep_Executor")
+
+
+# Add Conditional Edges for cycles
+
+def router_WorkflowStep_Executor_WorkflowStep_Planner(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "WorkflowStep_Executor",
+    router_WorkflowStep_Executor_WorkflowStep_Planner,
+    {
+        "continue": "WorkflowStep_Planner",
+        "end": END
+    }
+)
 
 
 # Compile the Engine

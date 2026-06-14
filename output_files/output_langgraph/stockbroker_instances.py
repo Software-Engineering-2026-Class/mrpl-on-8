@@ -48,9 +48,12 @@ workflow.add_node("StartAgentStep", StartAgentStep_node)
 workflow.add_edge(START, "StartAgentStep")
 
 
-# Add Edges
+# Add Normal Edges
 
 workflow.add_edge("StartAgentStep", "EndAgentStep")
+
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

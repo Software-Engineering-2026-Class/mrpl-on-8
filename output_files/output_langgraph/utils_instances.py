@@ -68,11 +68,14 @@ workflow.add_node("FormatMessagesStep", FormatMessagesStep_node)
 workflow.add_edge(START, "CapitalizeSentenceStep")
 
 
-# Add Edges
+# Add Normal Edges
+
+workflow.add_edge("CapitalizeSentenceStep", "CapitalizeStep")
 
 workflow.add_edge("CapitalizeStep", "FormatMessagesStep")
 
-workflow.add_edge("CapitalizeSentenceStep", "CapitalizeStep")
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

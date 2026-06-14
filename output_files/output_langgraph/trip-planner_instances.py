@@ -88,21 +88,24 @@ workflow.add_node("EndStep_TripPlanner", EndStep_TripPlanner_node)
 workflow.add_edge(START, "StartStep_TripPlanner")
 
 
-# Add Edges
+# Add Normal Edges
 
-workflow.add_edge("Step_Classify", "Step_CallTools")
+workflow.add_edge("StartStep_TripPlanner", "Step_Extraction")
+
+workflow.add_edge("StartStep_TripPlanner", "Step_Classify")
 
 workflow.add_edge("Step_Extraction", "Step_CallTools")
+
+workflow.add_edge("Step_Extraction", "EndStep_TripPlanner")
+
+workflow.add_edge("Step_Classify", "Step_CallTools")
 
 workflow.add_edge("Step_Classify", "Step_Extraction")
 
 workflow.add_edge("Step_CallTools", "EndStep_TripPlanner")
 
-workflow.add_edge("Step_Extraction", "EndStep_TripPlanner")
 
-workflow.add_edge("StartStep_TripPlanner", "Step_Classify")
-
-workflow.add_edge("StartStep_TripPlanner", "Step_Extraction")
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

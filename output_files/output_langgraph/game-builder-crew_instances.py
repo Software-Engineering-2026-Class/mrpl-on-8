@@ -27,7 +27,7 @@ llm = ChatGoogleGenerativeAI(model=clean_model_name, google_api_key=api_key)
 # --- 3. Node Definitions ---
 
 
-def RouterStep_node(state: AgentState):
+def ws_manager_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -35,7 +35,7 @@ def RouterStep_node(state: AgentState):
 
 
 
-def StockbrokerStep_node(state: AgentState):
+def ws_coder_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -43,7 +43,7 @@ def StockbrokerStep_node(state: AgentState):
 
 
 
-def TripPlannerStep_node(state: AgentState):
+def ws_qa_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -51,39 +51,7 @@ def TripPlannerStep_node(state: AgentState):
 
 
 
-def OpenCodeStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def OrderPizzaStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def GeneralInputStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def WriterAgentStep_node(state: AgentState):
-    '''Executes the task for GenericAgent.'''
-    system_msg = SystemMessage(content="Execute task.")
-    response = llm.invoke([system_msg] + state["messages"])
-    return {"messages": [response]}
-
-
-
-def EndStep_Generic_node(state: AgentState):
+def ws_reviewer_node(state: AgentState):
     '''Executes the task for GenericAgent.'''
     system_msg = SystemMessage(content="Execute task.")
     response = llm.invoke([system_msg] + state["messages"])
@@ -96,46 +64,72 @@ workflow = StateGraph(AgentState)
 
 # Add Nodes
 
-workflow.add_node("RouterStep", RouterStep_node)
+workflow.add_node("ws_manager", ws_manager_node)
 
-workflow.add_node("StockbrokerStep", StockbrokerStep_node)
+workflow.add_node("ws_coder", ws_coder_node)
 
-workflow.add_node("TripPlannerStep", TripPlannerStep_node)
+workflow.add_node("ws_qa", ws_qa_node)
 
-workflow.add_node("OpenCodeStep", OpenCodeStep_node)
-
-workflow.add_node("OrderPizzaStep", OrderPizzaStep_node)
-
-workflow.add_node("GeneralInputStep", GeneralInputStep_node)
-
-workflow.add_node("WriterAgentStep", WriterAgentStep_node)
-
-workflow.add_node("EndStep_Generic", EndStep_Generic_node)
+workflow.add_node("ws_reviewer", ws_reviewer_node)
 
 
 # Add Entry Points (START)
 
-workflow.add_edge(START, "RouterStep")
-
-workflow.add_edge(START, "EndStep_Generic")
+workflow.add_edge(START, "ws_manager")
 
 
 # Add Normal Edges
 
-workflow.add_edge("RouterStep", "StockbrokerStep")
+workflow.add_edge("ws_manager", "ws_coder")
 
-workflow.add_edge("RouterStep", "TripPlannerStep")
+workflow.add_edge("ws_manager", "ws_qa")
 
-workflow.add_edge("RouterStep", "OpenCodeStep")
-
-workflow.add_edge("RouterStep", "OrderPizzaStep")
-
-workflow.add_edge("RouterStep", "GeneralInputStep")
-
-workflow.add_edge("RouterStep", "WriterAgentStep")
+workflow.add_edge("ws_manager", "ws_reviewer")
 
 
 # Add Conditional Edges for cycles
+
+def router_ws_coder_ws_manager(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "ws_coder",
+    router_ws_coder_ws_manager,
+    {
+        "continue": "ws_manager",
+        "end": END
+    }
+)
+
+def router_ws_qa_ws_manager(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "ws_qa",
+    router_ws_qa_ws_manager,
+    {
+        "continue": "ws_manager",
+        "end": END
+    }
+)
+
+def router_ws_reviewer_ws_manager(state: AgentState):
+    if len(state["messages"]) > 10:
+        return "end"
+    return "continue"
+
+workflow.add_conditional_edges(
+    "ws_reviewer",
+    router_ws_reviewer_ws_manager,
+    {
+        "continue": "ws_manager",
+        "end": END
+    }
+)
 
 
 # Compile the Engine

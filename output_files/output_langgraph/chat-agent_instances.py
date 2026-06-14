@@ -48,7 +48,10 @@ workflow.add_node("ChatStep", ChatStep_node)
 workflow.add_edge(START, "ChatStep")
 
 
-# Add Edges
+# Add Normal Edges
+
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine

@@ -82,11 +82,14 @@ workflow.add_edge(START, "RewriteEmailStep")
 workflow.add_edge(START, "SendEmailStep")
 
 
-# Add Edges
+# Add Normal Edges
+
+workflow.add_edge("WriteEmailStep", "InterruptStep")
 
 workflow.add_edge("RewriteEmailStep", "InterruptStep")
 
-workflow.add_edge("WriteEmailStep", "InterruptStep")
+
+# Add Conditional Edges for cycles
 
 
 # Compile the Engine
