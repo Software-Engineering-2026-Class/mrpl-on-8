@@ -1,0 +1,52 @@
+@prefix : <http://www.w3id.org/agentic-ai/onto#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+#################################################################
+# Ported Pattern: Recruitment Crew (Sequential) -> LangGraph
+#################################################################
+
+:RecruitmentPattern a :WorkflowPattern ;
+    rdfs:label "Recruitment Workflow Pattern" ;
+    :hasWorkflowStep :ws_research , :ws_match_and_score , :ws_outreach , :ws_report .
+
+# --- Agents ---
+:agent_researcher a :LLMAgent ;
+    rdfs:label "Researcher Agent" ;
+    :agentPrompt [ :promptContext "Conduct thorough research to find potential candidates for the specified job." ] .
+
+:agent_matcher a :LLMAgent ;
+    rdfs:label "Matcher Agent" ;
+    :agentPrompt [ :promptContext "Evaluate and match the candidates to the best job positions." ] .
+
+:agent_communicator a :LLMAgent ;
+    rdfs:label "Communicator Agent" ;
+    :agentPrompt [ :promptContext "Develop a comprehensive strategy to reach out to the selected candidates." ] .
+
+:agent_reporter a :LLMAgent ;
+    rdfs:label "Reporter Agent" ;
+    :agentPrompt [ :promptContext "Compile a comprehensive report for recruiters on the best candidates." ] .
+
+# --- Tasks (Nodes) ---
+:ws_research a :StartStep ;
+    rdfs:label "Research Step" ;
+    :stepOrder 1 ;
+    :nextStep :ws_match_and_score ;
+    :hasAssociatedTask [ :performedByAgent :agent_researcher ] .
+
+:ws_match_and_score a :WorkflowStep ;
+    rdfs:label "Match and Score Step" ;
+    :stepOrder 2 ;
+    :nextStep :ws_outreach ;
+    :hasAssociatedTask [ :performedByAgent :agent_matcher ] .
+
+:ws_outreach a :WorkflowStep ;
+    rdfs:label "Outreach Strategy Step" ;
+    :stepOrder 3 ;
+    :nextStep :ws_report ;
+    :hasAssociatedTask [ :performedByAgent :agent_communicator ] .
+
+:ws_report a :EndStep ;
+    rdfs:label "Report Step" ;
+    :stepOrder 4 ;
+    :hasAssociatedTask [ :performedByAgent :agent_reporter ] .
