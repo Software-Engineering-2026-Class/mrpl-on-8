@@ -1,0 +1,43 @@
+@prefix : <http://www.w3id.org/agentic-ai/onto#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+#################################################################
+# Ported Pattern: Marketing Strategy (Sequential) -> LangGraph
+#################################################################
+
+:MarketingStrategyPattern a :WorkflowPattern ;
+    rdfs:label "Marketing Strategy Workflow Pattern" ;
+    :hasWorkflowStep :ws_analysis , :ws_campaign , :ws_content .
+
+# --- Agents ---
+:agent_analyst a :LLMAgent ;
+    rdfs:label "Market Analyst Agent" ;
+    :agentPrompt [ :promptContext "Analyze market trends and competitor strategies." ] .
+
+:agent_campaign a :LLMAgent ;
+    rdfs:label "Campaign Strategist Agent" ;
+    :agentPrompt [ :promptContext "Design a marketing campaign based on analysis." ] .
+
+:agent_content a :LLMAgent ;
+    rdfs:label "Content Creator Agent" ;
+    :agentPrompt [ :promptContext "Create marketing content for the designed campaign." ] .
+
+
+# --- Tasks (Nodes) ---
+:ws_analysis a :StartStep ;
+    rdfs:label "Market Analysis Step" ;
+    :stepOrder 1 ;
+    :nextStep :ws_campaign ;
+    :hasAssociatedTask [ :performedByAgent :agent_analyst ] .
+
+:ws_campaign a :WorkflowStep ;
+    rdfs:label "Campaign Design Step" ;
+    :stepOrder 2 ;
+    :nextStep :ws_content ;
+    :hasAssociatedTask [ :performedByAgent :agent_campaign ] .
+
+:ws_content a :EndStep ;
+    rdfs:label "Content Creation Step" ;
+    :stepOrder 3 ;
+    :hasAssociatedTask [ :performedByAgent :agent_content ] .
