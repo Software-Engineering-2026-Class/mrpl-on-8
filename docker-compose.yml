@@ -1,3 +1,18 @@
+# =============================================================================
+# Port Mapping Documentation
+# =============================================================================
+# This application is a CLI-based code generation pipeline (not a web server).
+# Therefore, NO external port mappings are exposed by any service.
+#
+# Service Overview:
+#   - agento      : Production runner — Ports: None (CLI only)
+#   - agento-dev  : Interactive dev shell — Ports: None
+#
+# If a web UI or API server is added in the future, expose ports like:
+#   ports:
+#     - "8080:8080"   # Web UI
+#     - "3030:3030"   # SPARQL endpoint
+# =============================================================================
 
 services:
   agento:
