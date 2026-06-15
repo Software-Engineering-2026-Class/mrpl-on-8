@@ -141,7 +141,16 @@ The application uses a `.env` file to manage configuration variables. Ensure you
    ```
    docker compose up agento
    ```
-   *Note: Because this is a CLI pipeline application, no external port mappings are required in `docker-compose.yml`. All processes run natively within the container and output code artifacts to the bound `/app/output_files` volume.*
+   #### Port Mappings
+
+   This is a **CLI pipeline application** — no web server or API is exposed. All services run internally and produce output via volume mounts.
+
+   | Service | Container Name | Exposed Ports | Description |
+   |---------|---------------|:-------------:|-------------|
+   | `agento` | `agento-app` | None | Production pipeline runner. Output written to `/app/output_files` volume. |
+   | `agento-dev` | `agento-dev` | None | Interactive development shell (`/bin/bash`). |
+
+   > *If a web UI or SPARQL endpoint is added in the future, port mappings (e.g. `8080:8080`) can be configured in `docker-compose.yml`.*
 
 4. Go to development mode:
 
