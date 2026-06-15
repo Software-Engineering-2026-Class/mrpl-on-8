@@ -38,7 +38,7 @@ ENV PATH="/opt/venv/bin:$PATH" \
     VIRTUAL_ENV=/opt/venv
 
 # Copy project files
-COPY --chown=appuser:appuser pyproject.toml setup.py README.md LICENSE ./
+COPY --chown=appuser:appuser pyproject.toml README.md LICENSE ./
 COPY --chown=appuser:appuser src/crewai/ ./src/crewai/
 COPY --chown=appuser:appuser generated_kg/CrewAI/ ./generated_kg/CrewAI/
 COPY --chown=appuser:appuser scripts/ ./scripts/
