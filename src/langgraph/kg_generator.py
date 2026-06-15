@@ -4,6 +4,17 @@ import rdflib
 from jinja2 import Environment, DictLoader
 
 class AgentOGenerator:
+    """
+    Generates executable LangGraph Python scripts from AgentO Knowledge Graphs.
+
+    Pipeline: .ttl (Turtle) → SPARQL extraction → topology dict → Jinja2 template → .py
+
+    The generator handles three graph topologies:
+      - Linear chains   (A → B → C → END)
+      - Branching graphs (A → B, A → C)
+      - Cyclic graphs    (A → B → A) — uses DFS to detect back-edges and
+                          injects conditional routing to prevent infinite loops.
+    """
     def __init__(self, ttl_path: str):
         self.graph = rdflib.Graph()
         self.graph.parse(ttl_path, format="turtle")
